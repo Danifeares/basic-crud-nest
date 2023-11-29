@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, HttpStatus, NotFoundException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -6,7 +6,7 @@ import { Response } from 'express';
 
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Post()
   create(@Body() createUserDto: CreateUserDto, @Res() res: Response) {
@@ -19,18 +19,43 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+  @Get(':email')
+  findOne(@Param('email') email: string, @Res() res: Response) {
+
+    const user = this.usersService.findOne(email);
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado.')
+    }
+
+    return res.json(user)
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @Patch(':email')
+  update(@Param('email') email: string, @Body() updateUserDto: UpdateUserDto, @Res() res: Response) {
+
+    const user = this.usersService.findOne(email);
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado.')
+    }
+
+    this.usersService.update(email, updateUserDto)
+
+    return res.status(HttpStatus.NO_CONTENT).send()
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+  @Delete(':email')
+  remove(@Param('email') email: string, @Res() res: Response) {
+
+    const user = this.usersService.findOne(email);
+
+    if (!user) {
+      throw new NotFoundException('Usuário não encontrado.')
+    }
+
+    this.usersService.remove(email);
+
+    return res.status(HttpStatus.NO_CONTENT).send()
   }
 }

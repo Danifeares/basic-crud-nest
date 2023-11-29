@@ -18,15 +18,18 @@ export class UsersService {
     return this.users;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findOne(email: string) {
+    return this.users.find((user) => user.getEmail() === email);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  update(email:string, updateUserDto: UpdateUserDto) {
+    const user = this.findOne(email);
+    user.setEmail(updateUserDto.email)
+    user.setName(updateUserDto.name)
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(email: string) {
+    const UserIndex = this.users.findIndex((user) => user.getEmail() === email)
+    this.users.splice(UserIndex, 1)
   }
 }
